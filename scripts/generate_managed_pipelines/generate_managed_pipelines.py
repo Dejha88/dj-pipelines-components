@@ -19,7 +19,14 @@ METADATA_FILENAME = "metadata.yaml"
 PIPELINE_PY = "pipeline.py"
 
 # Must match values accepted in metadata.yaml (see scripts/validate_metadata).
-STABILITY_VALUES = frozenset({"experimental", "alpha", "beta", "stable"})
+METADATA_STABILITY_VALUES = frozenset({"experimental", "alpha", "beta", "stable"})
+
+# Map metadata stability to consumer-facing labels in managed-pipelines.json.
+STABILITY_TO_MANAGED_DISPLAY: dict[str, str] = {
+    "alpha": "Development Preview",
+    "beta": "Technology Preview",
+    "stable": "General Availability",
+}
 
 
 class ManagedPipelineMetadataError(ValueError):
@@ -86,11 +93,17 @@ def managed_pipeline_entry_from_dir(
             pipeline_dir=dir_path,
         )
     stability = raw_stability.strip()
-    if stability not in STABILITY_VALUES:
+    if stability not in METADATA_STABILITY_VALUES:
         raise ManagedPipelineMetadataError(
-            f"{label}: metadata 'stability' must be one of {sorted(STABILITY_VALUES)}, got {stability!r}",
+            f"{label}: metadata 'stability' must be one of {sorted(METADATA_STABILITY_VALUES)}, got {stability!r}",
             pipeline_dir=dir_path,
         )
+    if stability == "experimental":
+        raise ManagedPipelineMetadataError(
+            f"{label}: managed pipelines cannot use 'experimental' stability; use alpha, beta, or stable",
+            pipeline_dir=dir_path,
+        )
+    display_stability = STABILITY_TO_MANAGED_DISPLAY[stability]
 
     try:
         rel_path = dir_path.relative_to(repo_root)
@@ -113,7 +126,7 @@ def managed_pipeline_entry_from_dir(
         name=raw_name.strip(),
         description=description,
         path=path_str,
-        stability=stability,
+        stability=display_stability,
     )
 
 

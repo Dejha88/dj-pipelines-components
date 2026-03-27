@@ -24,7 +24,7 @@ The JSON is an array of objects with:
 | `name`        | `metadata.yaml` name  | Pipeline name |
 | `description` | See below             | Short description for the catalog |
 | `path`        | Derived               | Relative path to `pipeline.py` (e.g. `pipelines/training/automl/my_pipeline/pipeline.py`) |
-| `stability`   | `metadata.yaml` stability | One of: experimental, alpha, beta, stable |
+| `stability`   | `metadata.yaml` stability | `alpha` → Development Preview; `beta` → Technology Preview; `stable` → General Availability. `experimental` is not allowed for managed pipelines. |
 
 **`description` resolution (in order):**
 
